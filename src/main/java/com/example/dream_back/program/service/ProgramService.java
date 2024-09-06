@@ -1,9 +1,9 @@
-package com.example.dream_back.referral_program.service;
+package com.example.dream_back.program.service;
 
 
-import com.example.dream_back.referral_program.dto.AiProgramDTO;
-import com.example.dream_back.referral_program.dto.ProgramReqDTO;
-import com.example.dream_back.referral_program.dto.ProgramResDTOs;
+import com.example.dream_back.program.dto.AiProgramDTO;
+import com.example.dream_back.program.dto.ProgramReqDTO;
+import com.example.dream_back.program.dto.ProgramResDTOs;
 import com.example.dream_back.story.entity.StoryEntity;
 import com.example.dream_back.story.repositoty.StoryRepository;
 import org.springframework.stereotype.Service;

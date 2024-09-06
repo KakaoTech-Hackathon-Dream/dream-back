@@ -1,4 +1,4 @@
-package com.example.dream_back.referral_program.dto;
+package com.example.dream_back.program.dto;
 
 import lombok.Data;
 
