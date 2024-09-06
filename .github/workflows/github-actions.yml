@@ -55,6 +55,7 @@ jobs:
         working-directory: ./
         run: |
           chmod +x ./gradlew
+          ./gradlew clean build --warning-mode all
 
       - name: Configure AWS credentials
         if: ${{ github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' }}
