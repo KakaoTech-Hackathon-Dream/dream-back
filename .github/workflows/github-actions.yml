@@ -47,9 +47,9 @@ jobs:
         working-directory: .
         run: |
           mkdir -p ./src/main/resources/
-          echo "${{ secrets.APPLICATION_DEFAULT }}" | base64 --decode > auth/src/main/resources/application.yml
-          echo "${{ secrets.APPLICATION_LOCAL }}" | base64 --decode > auth/src/main/resources/application-local.yml
-          echo "${{ secrets.APPLICATION_PROD  }}" | base64 --decode > auth/src/main/resources/application-prod.yml
+          echo "${{ secrets.APPLICATION_DEFAULT }}" | base64 --decode > ./src/main/resources/application.yml
+          echo "${{ secrets.APPLICATION_LOCAL }}" | base64 --decode > ./src/main/resources/application-local.yml
+          echo "${{ secrets.APPLICATION_PROD  }}" | base64 --decode > ./src/main/resources/application-prod.yml
 
       - name: 빌드
         working-directory: ./
