@@ -60,7 +60,7 @@ public class StoryService {
                 .bodyValue(aiStoryReqDTO)
                 .retrieve()
                 .bodyToMono(AiStoryResDTO.class)
-                .block();  // 동기식 호출로 변경
+                .block();
 
         storyEntity.addStory(aiStoryResDTO.getStory());
         storyEntity.setStoryIndex(aiStoryResDTO.getStoryIndex());

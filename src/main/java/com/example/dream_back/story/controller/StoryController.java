@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class StoryController {
 
-    private StoryService storyService;
+    private final StoryService storyService;
 
     @RequestMapping("/story")
     public StoryResDTO createStory(@RequestBody StoryReqDTO storyReqDTO) {

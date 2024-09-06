@@ -9,15 +9,6 @@ public class StoryResDTO {
     private String story;
     private boolean flag;
 
-    public static StoryResDTO toStoryResDTO(StoryEntity storyEntity){
-        StoryResDTO storyResDTO = new StoryResDTO();
-
-        storyResDTO.id = storyEntity.getId();
-        storyResDTO.story = storyEntity.getStory();
-
-        return storyResDTO;
-    }
-
     public static StoryResDTO toStoryResDTO(AiStoryResDTO aiStoryResDTO){
         StoryResDTO storyResDTO = new StoryResDTO();
 
