@@ -1,0 +1,91 @@
+name: CI/CD
+on:
+  push:
+    branches:
+      - feature/*
+      - main
+  workflow_dispatch:
+
+jobs:
+  backend-CI:
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: dream123@
+          MYSQL_DATABASE: dream
+          MYSQL_USE_SSL: false
+          MYSQL_SERVER_TIMEZONE: Asia/Seoul
+          MYSQL_CHARACTER_ENCODING: UTF-8
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: 체크아웃
+        uses: actions/checkout@v2
+        with:
+          python-version: 3.12.4
+
+      - name: Verify MySQL connection from host
+        run: mysql -h 127.0.0.1 --port=3306 -u root -pdream123@ -e "SHOW DATABASES"
+
+      - name: JDK 17 설정
+        uses: actions/setup-java@v3
+        with:
+          java-version: "17"
+          distribution: "corretto"
+
+      - name: Set up Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: '8.5'
+
+      - name: YML 파일 생성
+        working-directory: .
+        run: |
+          mkdir -p auth/src/main/resources/
+          echo "${{ secrets.APPLICATION_DEFAULT }}" | base64 --decode > auth/src/main/resources/application.yml
+          echo "${{ secrets.APPLICATION_LOCAL }}" | base64 --decode > auth/src/main/resources/application-local.yml
+          echo "${{ secrets.APPLICATION_PROD  }}" | base64 --decode > auth/src/main/resources/application-prod.yml
+
+      - name: 빌드
+        working-directory: ./
+        run: |
+          chmod +x ./gradlew
+
+      - name: Configure AWS credentials
+        if: ${{ github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' }}
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+
+      - name: 배포 Dir 생성
+        if: ${{ github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' }}
+        working-directory: ./
+        run: |
+          mkdir -p deploy-back
+          cp build/libs/*.jar deploy-back/
+          cp Dockerfile deploy-back/
+          cp docker-compose.yml deploy-back/
+
+      - name: S3 업로드 및 CD 요청
+        if: ${{ github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' }}
+        working-directory: ./
+        run: |
+          cp utils/*.sh deploy-back
+          cp utils/appspec.yml deploy-back
+          cd deploy-back && zip -r deploy-back *
+          aws s3 cp deploy-back.zip s3://${{ secrets.AWS_BUCKET_NAME }}/deploy-back.zip
+
+          aws deploy create-deployment \
+          --application-name ${{ secrets.AWS_CODEDEPLOY_APP_NAME }} \
+          --deployment-config-name CodeDeployDefault.AllAtOnce \
+          --deployment-group-name ${{ secrets.AWS_CODEDEPLOY_GROUP_NAME }} \
+          --file-exists-behavior OVERWRITE \
+          --s3-location bucket=${{ secrets.AWS_BUCKET_NAME }},bundleType=zip,key=deploy-back.zip
