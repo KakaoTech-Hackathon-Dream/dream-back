@@ -17,7 +17,7 @@ public class StoryService {
     private final StoryRepository storyRepository;
     private final WebClient webClient;
 
-    private static final String AI_URI = "http://localhost:8000";
+    private static final String AI_URI = "http://ai:8000";
 
     public StoryService(StoryRepository storyRepository, WebClient.Builder webClientBuilder) {
         this.storyRepository = storyRepository;
@@ -70,6 +70,11 @@ public class StoryService {
                 .retrieve()
                 .bodyToMono(AiStoryResDTO.class)
                 .block();
+
+        log.info("----------------");
+        log.info(storyEntity.getStory());
+        log.info("----------------");
+        log.info(aiStoryResDTO.getStory());
 
         storyEntity.addStory(aiStoryResDTO.getStory());
         storyEntity.setStoryIndex(aiStoryResDTO.getStoryIndex());
