@@ -1,6 +1,5 @@
-package com.example.dream_back.controller;
+package com.example.dream_back.story.controller;
 
-import com.example.dream_back.story.controller.StoryController;
 import com.example.dream_back.story.dto.ReStoryReqDTO;
 import com.example.dream_back.story.dto.StoryReqDTO;
 import com.example.dream_back.story.dto.StoryResDTO;

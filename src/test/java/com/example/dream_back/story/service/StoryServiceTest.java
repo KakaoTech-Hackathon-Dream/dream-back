@@ -1,9 +1,8 @@
-package com.example.dream_back.service;
+package com.example.dream_back.story.service;
 
 import com.example.dream_back.story.dto.*;
 import com.example.dream_back.story.entity.StoryEntity;
 import com.example.dream_back.story.repositoty.StoryRepository;
-import com.example.dream_back.story.service.StoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
