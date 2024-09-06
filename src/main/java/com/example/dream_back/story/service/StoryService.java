@@ -17,7 +17,7 @@ public class StoryService {
     private final StoryRepository storyRepository;
     private final WebClient webClient;
 
-    private static final String AI_URI = "http://ai:8000";
+    private static final String AI_URI = "http://localhost:8000";
 
     public StoryService(StoryRepository storyRepository, WebClient.Builder webClientBuilder) {
         this.storyRepository = storyRepository;
@@ -26,25 +26,33 @@ public class StoryService {
 
     @Transactional
     public StoryResDTO saveStory(StoryReqDTO storyReqDTO) {
+        // 1. 먼저 StoryEntity를 저장
         StoryEntity storyEntity = StoryEntity.toStoryEntity(storyReqDTO);
         storyRepository.save(storyEntity);
 
-        AiStoryReqDTO aiStoryReqDTO = AiStoryReqDTO.toAiStoryReqDTO(storyEntity);
-        aiStoryReqDTO.setStory(null);
-        aiStoryReqDTO.setStoryIndex(0);
+        // 2. 트랜잭션 외부에서 AI API 호출 처리
+        AiStoryResDTO aiStoryResDTO = callAiService(storyEntity);
 
-        AiStoryResDTO aiStoryResDTO = webClient.post()
-                .uri(AI_URI + "/ai/story")
-                .bodyValue(aiStoryReqDTO)
-                .retrieve()
-                .bodyToMono(AiStoryResDTO.class)
-                .block();
-
+        // 3. AI 결과를 기반으로 다시 StoryEntity 업데이트
         storyEntity.setStory(aiStoryResDTO.getStory());
         storyEntity.setStoryIndex(aiStoryResDTO.getStoryIndex());
         storyRepository.save(storyEntity);
 
         return StoryResDTO.toStoryResDTO(aiStoryResDTO);
+    }
+
+    private AiStoryResDTO callAiService(StoryEntity storyEntity) {
+        AiStoryReqDTO aiStoryReqDTO = AiStoryReqDTO.toAiStoryReqDTO(storyEntity);
+        aiStoryReqDTO.setStory(null); // 초기 값 설정
+        aiStoryReqDTO.setStoryIndex(0); // 초기 값 설정
+
+        // WebClient를 통한 외부 API 호출
+        return webClient.post()
+                .uri(AI_URI + "/ai/story")
+                .bodyValue(aiStoryReqDTO)
+                .retrieve()
+                .bodyToMono(AiStoryResDTO.class)
+                .block();
     }
 
     @Transactional

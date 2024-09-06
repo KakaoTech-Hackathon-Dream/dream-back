@@ -1,9 +1,7 @@
 package com.example.dream_back.story.entity;
 
 import com.example.dream_back.story.dto.StoryReqDTO;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,6 +17,7 @@ public class StoryEntity {
 
     private String text;
 
+    @Column(columnDefinition = "LONGTEXT")
     private String story;
 
     private int storyIndex;
