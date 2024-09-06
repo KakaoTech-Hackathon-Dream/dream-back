@@ -1,10 +1,12 @@
 package com.example.dream_back.story.dto;
 
+import jakarta.persistence.Lob;
 import lombok.Data;
 
 @Data
 public class StoryResDTO {
     private int id;
+    @Lob
     private String story;
     private boolean flag;
 
