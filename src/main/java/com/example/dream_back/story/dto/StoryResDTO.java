@@ -1,6 +1,5 @@
 package com.example.dream_back.story.dto;
 
-import com.example.dream_back.story.entity.StoryEntity;
 import lombok.Data;
 
 @Data

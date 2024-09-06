@@ -34,10 +34,7 @@ public class StoryEntity {
     }
 
     public void addStory(String story){
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(this.story).append(story);
-
-        this.story = stringBuilder.toString();
+        this.story = this.story + story;
     }
 
     public void setStoryIndex(int index){

@@ -3,6 +3,7 @@ package com.example.dream_back.story.service;
 import com.example.dream_back.story.entity.StoryEntity;
 import com.example.dream_back.story.dto.*;
 import com.example.dream_back.story.repositoty.StoryRepository;
+import com.example.dream_back.story.valid.StoryNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +38,7 @@ public class StoryService {
                 .bodyValue(aiStoryReqDTO)
                 .retrieve()
                 .bodyToMono(AiStoryResDTO.class)
-                .block();  // 동기식 호출로 변경
+                .block();
 
         storyEntity.setStory(aiStoryResDTO.getStory());
         storyEntity.setStoryIndex(aiStoryResDTO.getStoryIndex());
@@ -49,7 +50,7 @@ public class StoryService {
     @Transactional
     public StoryResDTO resaveStory(ReStoryReqDTO reStoryReqDTO) {
         StoryEntity storyEntity = storyRepository.findById(reStoryReqDTO.getId())
-                .orElseThrow(() -> new RuntimeException("Story not found"));
+                .orElseThrow(() -> new StoryNotFoundException(reStoryReqDTO.getId()));
 
         AiStoryReqDTO aiStoryReqDTO = AiStoryReqDTO.toAiStoryReqDTO(storyEntity);
         aiStoryReqDTO.setId(reStoryReqDTO.getId());
@@ -68,4 +69,5 @@ public class StoryService {
 
         return StoryResDTO.toStoryResDTO(aiStoryResDTO);
     }
+
 }
