@@ -85,9 +85,9 @@ jobs:
         working-directory: ./
         run: |
           mkdir -p deploy-nginx
-          cp * deploy-nginx/*
-          cp utils/*.sh deploy-nginx
-          cp utils/appspec.yml deploy-nginx
+          cp ./nginx/* deploy-nginx/
+          cp utils/*.sh deploy-nginx/
+          cp utils/appspec.yml deploy-nginx/
           cd deploy-nginx && zip -r deploy-nginx *
           aws s3 cp deploy-nginx.zip s3://${{ secrets.AWS_BUCKET_NAME }}/deploy-nginx.zip
 
