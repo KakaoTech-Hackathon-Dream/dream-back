@@ -109,7 +109,7 @@ jobs:
         if: ${{ github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' }}
         working-directory: ./
         run: |
-          mkdir -p deploy-nginxp
+          mkdir -p deploy-nginx
           cp utils/*.sh deploy-nginx
           cp utils/appspec.yml deploy-nginx
           cd deploy-nginx && zip -r deploy-nginx *
