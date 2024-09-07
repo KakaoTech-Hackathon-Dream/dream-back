@@ -84,10 +84,8 @@ jobs:
         if: ${{ github.ref == 'refs/heads/dev' && github.ref == 'refs/heads/main' }}
         working-directory: ./
         run: |
-          mkdir -p deploy-nginx/conf.d
-          cp nginx.conf deploy-nginx/
-          cp conf.d/* deploy-nginx/conf.d
-          cp docker-compose.yml deploy-nginx/
+          mkdir -p deploy-nginx
+          cp * deploy-nginx/*
 
       - name: S3 업로드 및 CD 요청
         if: ${{ github.ref == 'refs/heads/dev' && github.ref == 'refs/heads/main' }}
