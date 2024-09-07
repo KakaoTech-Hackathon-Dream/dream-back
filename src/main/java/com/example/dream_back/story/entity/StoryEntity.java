@@ -15,6 +15,7 @@ public class StoryEntity {
 
     private String job;
 
+    @Column(columnDefinition = "LONGTEXT")
     private String text;
 
     @Column(columnDefinition = "LONGTEXT")
