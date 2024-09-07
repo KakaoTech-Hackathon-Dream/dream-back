@@ -30,20 +30,24 @@ jobs:
           python-version: 3.12.4
 
       - name: Verify MySQL connection from host
+        if: ${{ github.ref == 'refs/heads/dev' && github.ref == 'refs/heads/main' }}
         run: mysql -h 127.0.0.1 --port=3306 -u root -pdream123@ -e "SHOW DATABASES"
 
       - name: JDK 17 설정
+        if: ${{ github.ref == 'refs/heads/dev' && github.ref == 'refs/heads/main' }}
         uses: actions/setup-java@v3
         with:
           java-version: "17"
           distribution: "corretto"
 
       - name: Set up Gradle
+        if: ${{ github.ref == 'refs/heads/dev' && github.ref == 'refs/heads/main' }}
         uses: gradle/gradle-build-action@v2
         with:
           gradle-version: '8.5'
 
       - name: YML 파일 생성
+        if: ${{ github.ref == 'refs/heads/dev' && github.ref == 'refs/heads/main' }}
         working-directory: .
         run: |
           mkdir -p ./src/main/resources/
@@ -52,13 +56,14 @@ jobs:
           echo "${{ secrets.APPLICATION_PROD  }}" | base64 --decode > ./src/main/resources/application-prod.yml
 
       - name: 빌드
+        if: ${{ github.ref == 'refs/heads/dev' && github.ref == 'refs/heads/main' }}
         working-directory: ./
         run: |
           chmod +x ./gradlew
           ./gradlew clean build --warning-mode all
 
       - name: Configure AWS credentials
-        if: ${{ github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' }}
+        if: ${{ github.ref == 'refs/heads/dev' && github.ref == 'refs/heads/main' }}
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
@@ -67,7 +72,7 @@ jobs:
 
 
       - name: 배포 Dir 생성
-        if: ${{ github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' }}
+        if: ${{ github.ref == 'refs/heads/dev' && github.ref == 'refs/heads/main' }}
         working-directory: ./
         run: |
           mkdir -p deploy-back
@@ -75,8 +80,17 @@ jobs:
           cp Dockerfile deploy-back/
           cp docker-compose.yml deploy-back/
 
+      - name: 배포 Dir 생성
+        if: ${{ github.ref == 'refs/heads/dev' && github.ref == 'refs/heads/main' }}
+        working-directory: ./
+        run: |
+          mkdir -p deploy-nginx/conf.d
+          cp nginx.conf deploy-nginx/
+          cp conf.d/* deploy-nginx/conf.d
+          cp docker-compose.yml deploy-nginx/
+
       - name: S3 업로드 및 CD 요청
-        if: ${{ github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' }}
+        if: ${{ github.ref == 'refs/heads/dev' && github.ref == 'refs/heads/main' }}
         working-directory: ./
         run: |
           cp utils/*.sh deploy-back
@@ -90,3 +104,19 @@ jobs:
           --deployment-group-name ${{ secrets.AWS_CODEDEPLOY_GROUP_NAME_BACKEND }} \
           --file-exists-behavior OVERWRITE \
           --s3-location bucket=${{ secrets.AWS_BUCKET_NAME }},bundleType=zip,key=deploy-back.zip
+
+      - name: S3 업로드 및 CD 요청
+        if: ${{ github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' }}
+        working-directory: ./
+        run: |
+          cp utils/*.sh deploy-nginx
+          cp utils/appspec.yml deploy-nginx
+          cd deploy-nginx && zip -r deploy-nginx *
+          aws s3 cp deploy-nginx.zip s3://${{ secrets.AWS_BUCKET_NAME }}/deploy-nginx.zip
+
+          aws deploy create-deployment \
+          --application-name ${{ secrets.AWS_CODEDEPLOY_APP_NAME }} \
+          --deployment-config-name CodeDeployDefault.AllAtOnce \
+          --deployment-group-name ${{ secrets.AWS_CODEDEPLOY_GROUP_NAME_NGINX }} \
+          --file-exists-behavior OVERWRITE \
+          --s3-location bucket=${{ secrets.AWS_BUCKET_NAME }},bundleType=zip,key=deploy-nginx.zip
