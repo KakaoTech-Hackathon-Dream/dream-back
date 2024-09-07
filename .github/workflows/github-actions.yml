@@ -85,7 +85,7 @@ jobs:
         working-directory: ./
         run: |
           mkdir -p deploy-nginx
-          cp ./nginx/* deploy-nginx/
+          cp -r ./nginx/* deploy-nginx/
           cp utils/*.sh deploy-nginx/
           cp utils/appspec.yml deploy-nginx/
           cd deploy-nginx && zip -r deploy-nginx *
