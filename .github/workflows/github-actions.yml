@@ -81,7 +81,7 @@ jobs:
           cp docker-compose.yml deploy-back/
 
       - name: 배포 Dir 생성
-        if: ${{ github.ref == 'refs/heads/dev' && github.ref == 'refs/heads/main' }}
+        if: ${{ github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' }}
         working-directory: ./
         run: |
           mkdir -p deploy-nginx
