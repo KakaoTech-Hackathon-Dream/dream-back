@@ -86,6 +86,17 @@ jobs:
         run: |
           mkdir -p deploy-nginx
           cp * deploy-nginx/*
+          cp utils/*.sh deploy-nginx
+          cp utils/appspec.yml deploy-nginx
+          cd deploy-nginx && zip -r deploy-nginx *
+          aws s3 cp deploy-nginx.zip s3://${{ secrets.AWS_BUCKET_NAME }}/deploy-nginx.zip
+
+          aws deploy create-deployment \
+          --application-name ${{ secrets.AWS_CODEDEPLOY_APP_NAME }} \
+          --deployment-config-name CodeDeployDefault.AllAtOnce \
+          --deployment-group-name ${{ secrets.AWS_CODEDEPLOY_GROUP_NAME_NGINX }} \
+          --file-exists-behavior OVERWRITE \
+          --s3-location bucket=${{ secrets.AWS_BUCKET_NAME }},bundleType=zip,key=deploy-nginx.zip
 
       - name: S3 업로드 및 CD 요청
         if: ${{ github.ref == 'refs/heads/dev' && github.ref == 'refs/heads/main' }}
@@ -102,19 +113,3 @@ jobs:
           --deployment-group-name ${{ secrets.AWS_CODEDEPLOY_GROUP_NAME_BACKEND }} \
           --file-exists-behavior OVERWRITE \
           --s3-location bucket=${{ secrets.AWS_BUCKET_NAME }},bundleType=zip,key=deploy-back.zip
-
-      - name: S3 업로드 및 CD 요청
-        if: ${{ github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main' }}
-        working-directory: ./
-        run: |
-          cp utils/*.sh deploy-nginx
-          cp utils/appspec.yml deploy-nginx
-          cd deploy-nginx && zip -r deploy-nginx *
-          aws s3 cp deploy-nginx.zip s3://${{ secrets.AWS_BUCKET_NAME }}/deploy-nginx.zip
-
-          aws deploy create-deployment \
-          --application-name ${{ secrets.AWS_CODEDEPLOY_APP_NAME }} \
-          --deployment-config-name CodeDeployDefault.AllAtOnce \
-          --deployment-group-name ${{ secrets.AWS_CODEDEPLOY_GROUP_NAME_NGINX }} \
-          --file-exists-behavior OVERWRITE \
-          --s3-location bucket=${{ secrets.AWS_BUCKET_NAME }},bundleType=zip,key=deploy-nginx.zip
